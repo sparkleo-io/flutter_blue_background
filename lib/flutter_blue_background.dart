@@ -1,7 +1,6 @@
 
 import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,7 +16,6 @@ class FlutterBlueBackground {
 
   static Future<String?> getPlatformVersion() async {
     final version = await _channel.invokeMethod<String>('getBatteryLevel');
-    print('version is $version');
     return version;
   }
 
@@ -26,7 +24,7 @@ class FlutterBlueBackground {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.reload();
     final log = preferences.getStringList('log') ?? <String>[];
-    log.add("Ghous Khan");
+    log.add("Ghous Muhammad");
     await preferences.setStringList('log', log);
   }
 
@@ -47,16 +45,15 @@ class FlutterBlueBackground {
       try {
         // await initializeService();
         backgroundFunction!();
-        print("Call connectToDevice Method to start background service");
       } catch (e) {
-        print("Error executing in the background: $e");
+        // print("Error executing in the background: $e");
       }
     }else{
       try {
         await _channel.invokeMethod('executeInBackground');
         backgroundFunction!();
       } catch (e) {
-        print("Error executing in the background: $e");
+        // print("Error executing in the background: $e");
       }
     }
 
@@ -161,7 +158,7 @@ class FlutterBlueBackground {
           'data': data
         });
       } catch (e) {
-        print("Error executing in the writing value: $e");
+        // print("Error executing in the writing value: $e");
       }
     }
   }
@@ -175,9 +172,9 @@ class FlutterBlueBackground {
       await preferences.reload();
       final log = preferences.getStringList('getReadData') ?? <String>[];
       log.clear();
-      print("clear read storage");
+      // print("clear read storage");
     } catch (e) {
-      print("Error to clear the read storage: $e");
+      // print("Error to clear the read storage: $e");
     }
   }
 

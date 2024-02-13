@@ -186,7 +186,7 @@ String? data = await FlutterBlueBackground.readData(
 );
 ```
 
-### Your characteristic value is stored like this in andriod:
+### Your characteristic value is stored like this in android:
 ```dart
 await preferences.setStringList('getReadData', log);
 ```
