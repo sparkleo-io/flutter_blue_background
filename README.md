@@ -5,7 +5,6 @@ Flutter Blue Background allows you to implement Bluetooth Low Energy (BLE) funct
 # Features
 <br>
 
-or edit run configurations in Android Studio:
 - Go to EditConfigurations...
 - Enter configuration name: DEV, STAGE, PROD
 - Enter dart entry point: main_dev.dart, main_staging.dart, main_production.dart
