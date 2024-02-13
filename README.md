@@ -229,8 +229,7 @@ await FlutterBlueBackground.clearReadStorage();
 ```dart
 await FlutterBlueBackground.startFlutterBackgroundService(() {
 // This timer is used to continusely reading the data in iOS
-  Timer.periodic(Duration(seconds: 8), (timer) async {
-    await FlutterBlueBackground.connectToDevice(
+  await FlutterBlueBackground.connectToDevice(
       deviceName: 'DeviceName',
       serviceUuid: 'ServiceUUID',
       characteristicUuid: 'CharacteristicUUID',
@@ -249,7 +248,6 @@ await FlutterBlueBackground.startFlutterBackgroundService(() {
       characteristicUuid: 'CharacteristicUUID',
     );
     print("Data in main is $data");
-  });
 
   print("Executing function in the background");
 });
