@@ -9,3 +9,20 @@ Flutter Blue Background allows you to implement Bluetooth Low Energy (BLE) funct
 - Connect to BLE devices and perform read and write operations on characteristics.
 - Supports both Android and iOS platforms.
 
+# Getting Started
+<br>
+
+- [iOS]()
+- [Android]()
+
+### Change the compileSdkVersion and minSdkVersion for Android
+
+flutter_blue_plus is compatible only from compileSdkVersion version 34 and minSdkVersion 21. So you should change this in **android/app/build.gradle**:
+
+```dart
+android {
+  compileSdkVersion 34
+  defaultConfig {
+     minSdkVersion: 21
+```
+
