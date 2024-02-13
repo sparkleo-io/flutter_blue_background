@@ -265,7 +265,7 @@ If you encounter any issues or have suggestions for improvements, feel free to o
 
 The MIT License
 
-Copyright (c) Sparkleo Technologies https://www.sparkleo.io/blog
+Copyright (c) Sparkleo Technologies https://www.sparkleo.io/
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
