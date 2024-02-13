@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 
@@ -69,14 +68,5 @@ class BluetoothAdapter {
     }
   }*/
 
-  static Future<bool> _androidVerAbove12() async {
-    final deviceInfo = await DeviceInfoPlugin().androidInfo;
-    final aInfo = deviceInfo.version.release;
-    double ver = double.parse(aInfo);
-    if (ver > 13) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+
 }

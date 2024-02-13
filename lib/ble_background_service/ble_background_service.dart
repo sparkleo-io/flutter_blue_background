@@ -318,7 +318,7 @@ void onStart(ServiceInstance service) async {
     }
 
     /// you can see this log in logcat
-    debugPrint('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
+    //debugPrint('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
 
 
 

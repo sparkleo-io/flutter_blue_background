@@ -153,7 +153,7 @@ class _MyAppState extends State<MyApp> {
               const SizedBox(height: 20,),
               ElevatedButton(
                   onPressed: () async {
-                    await FlutterBlueBackground.stopFlutterBackgroundService();
+                    await FlutterBlueBackground.clearReadStorage();
                   }, child: Text('Start/Stop Service')
               ),
               const SizedBox(height: 20,),

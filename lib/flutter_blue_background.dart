@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'liion_background_service/liion_background_service.dart';
+import 'ble_background_service/ble_background_service.dart';
 
 
 
@@ -173,7 +173,7 @@ class FlutterBlueBackground {
     try {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       await preferences.reload();
-      final log = preferences.getStringList('readData') ?? <String>[];
+      final log = preferences.getStringList('getReadData') ?? <String>[];
       log.clear();
       print("clear read storage");
     } catch (e) {
