@@ -150,6 +150,13 @@ class _MyAppState extends State<MyApp> {
                   }, child: const Text('Clear Read Data List')
               ),
 
+              const SizedBox(height: 20,),
+              ElevatedButton(
+                  onPressed: () async {
+                    await FlutterBlueBackground.getReadDataAndroid();
+                  }, child: const Text('Clear Read Data List')
+              ),
+
 
             ],
           ),

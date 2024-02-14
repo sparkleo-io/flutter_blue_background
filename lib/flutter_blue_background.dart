@@ -178,6 +178,18 @@ class FlutterBlueBackground {
     }
   }
 
+  static Future<List<String>?> getReadDataAndroid() async {
+    try {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      await preferences.reload();
+      final log = preferences.getStringList('getReadData') ?? <String>[];
+      return log;
+      // print("clear read storage");
+    } catch (e) {
+      // print("Error to clear the read storage: $e");
+    }
+  }
+
 
 
 

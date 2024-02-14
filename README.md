@@ -22,7 +22,7 @@ Flutter Blue Background allows you to implement Bluetooth Low Energy (BLE) funct
 
 ### Change the compileSdkVersion and minSdkVersion for Android
 
-flutter_blue_plus is compatible only from compileSdkVersion version 34 and minSdkVersion 21. So you should change this in **android/app/build.gradle**:
+flutter_blue_background is compatible only from compileSdkVersion version 34 and minSdkVersion 21. So you should change this in **android/app/build.gradle**:
 
 ```dart
 android {
