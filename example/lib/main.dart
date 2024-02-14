@@ -77,7 +77,7 @@ class _MyAppState extends State<MyApp> {
                   onPressed: () async {
                     // This method will get all the read data
                     await FlutterBlueBackground.getReadDataAndroid();
-                  }, child: const Text('Clear Read Data List')
+                  }, child: const Text('Get Read Data List')
               ),
               const SizedBox(height: 20,),
               ElevatedButton(

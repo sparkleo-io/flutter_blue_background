@@ -1,6 +1,6 @@
 name: flutter_blue_background
 description: Flutter Blue Background enables BLE functionality in the background for Android and iOS.
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/sparkleo-io/flutter_blue_background.git
 
 environment:
