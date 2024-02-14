@@ -187,6 +187,7 @@ class FlutterBlueBackground {
       // print("clear read storage");
     } catch (e) {
       // print("Error to clear the read storage: $e");
+      return "";
     }
   }
 
