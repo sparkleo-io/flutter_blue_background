@@ -17,7 +17,7 @@ Flutter Blue Background allows you to implement Bluetooth Low Energy (BLE) funct
 
 
 ## ⚠️ Android:
-  - The functionality works seamlessly on Android even when the app is fully terminated.
+  - The functionality works on Android even when the app is fully terminated.
   - On Android, direct data retrieval isn't possible after the application terminates. Therefore, data retrieval is facilitated through SharedPreferences.
 
 ### Change the compileSdkVersion and minSdkVersion for Android
