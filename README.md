@@ -17,12 +17,12 @@ Flutter Blue Background allows you to implement Bluetooth Low Energy (BLE) funct
 
 
 ## ⚠️ Android:
-  - The application operates flawlessly on Android even when it's fully terminated.
+  - The functionality works seamlessly on Android even when the app is fully terminated.
   - On Android, direct data retrieval isn't possible after the application terminates. Therefore, data retrieval is facilitated through SharedPreferences.
 
 ### Change the compileSdkVersion and minSdkVersion for Android
 
-flutter_blue_background is compatible with compileSdkVersion version 34 and minSdkVersion 21. So you should change this in **android/app/build.gradle**:
+flutter_blue_background is compatible with compileSdkVersion version 34 and minSdkVersion 21. Therefore, change this in **android/app/build.gradle**:
 
 ```dart
 android {
@@ -122,13 +122,13 @@ Add the corresponding permissions, service, and receiver to your android/app/src
 ```
 
 > **WARNING**:
-> * BEFORE START OF THE SERVICE, BE SURE ALL REQUIRED PERMISSIONS ARE GRANTED.
+> * BEFORE STARTING THE SERVICE, MAKE SURE ALL REQUIRED PERMISSIONS ARE GRANTED.
 > * Utilize the permission_handler and location packages to obtain user permissions. In case you encounter any difficulties, you can refer to the example folder for assistance.
 
 
 ### ⚠️ iOS: 
- - The functionality is limited to working only when the iOS app is in a minimized state.
- - iOS stop service, when the user terminates the app. There is no such thing for iOS.
+ - The functionality is limited to working only when the iOS app is in minimized state.
+ - Service stops when the user terminates the app.
 
 ### Add permissions for iOS
 
