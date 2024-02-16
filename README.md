@@ -1,6 +1,6 @@
 # Flutter Blue Background
 <br>
-Flutter Blue Background allows you to implement Bluetooth Low Energy (BLE) functionality in the background for both Android and iOS platforms. This package is designed to facilitate BLE communication tasks, such as connecting to devices, reading from and writing to characteristics, all while your Flutter application is running in the background.
+Flutter Blue Background allows you to implement Bluetooth Low Energy (BLE) functionality in the background for both Android and iOS platforms. This package is designed to facilitate BLE communication tasks, such as connecting to devices, reading from and writing to device, all while your Flutter application is running in the background.
 
 # Features
 <br>
@@ -17,12 +17,12 @@ Flutter Blue Background allows you to implement Bluetooth Low Energy (BLE) funct
 
 
 ## ⚠️ Android:
-  - The application functions correctly on Android even when fully terminated.
-  - In Android, due to the termination of the application, direct data retrieval isn't feasible. Therefore, data retrieval is facilitated through SharedPreferences.
+  - The application operates flawlessly on Android even when it's fully terminated.
+  - On Android, direct data retrieval isn't possible after the application terminates. Therefore, data retrieval is facilitated through SharedPreferences.
 
 ### Change the compileSdkVersion and minSdkVersion for Android
 
-flutter_blue_background is compatible only from compileSdkVersion version 34 and minSdkVersion 21. So you should change this in **android/app/build.gradle**:
+flutter_blue_background is compatible with compileSdkVersion version 34 and minSdkVersion 21. So you should change this in **android/app/build.gradle**:
 
 ```dart
 android {
@@ -31,7 +31,7 @@ android {
      minSdkVersion: 21
 ```
 
-Add the corresponding permissions, service and receiver to your android/app/src/main/AndroidManifest.xml file:
+Add the corresponding permissions, service, and receiver to your android/app/src/main/AndroidManifest.xml file:
 
 ```dart
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -122,13 +122,13 @@ Add the corresponding permissions, service and receiver to your android/app/src/
 ```
 
 > **WARNING**:
-> * YOU MUST MAKE SURE ANY REQUIRED PERMISSIONS TO BE GRANTED BEFORE YOU START THE SERVICE
-> * Utilize the permission_handler and location packages to obtain user permissions. If encountered with any difficulties, refer to the example folder for guidance.
+> * BEFORE START OF THE SERVICE, BE SURE ALL REQUIRED PERMISSIONS ARE GRANTED.
+> * Utilize the permission_handler and location packages to obtain user permissions. In case you encounter any difficulties, you can refer to the example folder for assistance.
 
 
 ### ⚠️ iOS: 
  - The functionality is limited to working only when the iOS app is in a minimized state.
- - iOS stop when the user terminates the app. There is no such thing as for iOS.
+ - iOS stop service, when the user terminates the app. There is no such thing for iOS.
 
 ### Add permissions for iOS
 
@@ -149,9 +149,6 @@ In the **ios/Runner/Info.plist** let’s add:
     <!-- Add other necessary keys and descriptions as per your application requirements -->
 
 ```
-
-Ensure to test your application thoroughly after applying these configurations to ensure proper functionality.
-
 
 
 ## Usage
