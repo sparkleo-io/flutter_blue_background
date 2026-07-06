@@ -1,200 +1,295 @@
+import 'dart:typed_data';
 
-import 'dart:async';
-import 'dart:io';
-import 'package:flutter/services.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'ble_background_service/ble_background_service.dart';
+import 'flutter_blue_background_platform_interface.dart';
+import 'src/ble_operation_mutex.dart';
+import 'src/fbb_log_level.dart';
+import 'src/fbb_logger.dart';
+import 'src/models/ble_adapter_state.dart';
+import 'src/models/ble_connection_state.dart';
+import 'src/models/ble_characteristic_id.dart';
+import 'src/models/ble_characteristic_value_event.dart';
+import 'src/models/ble_gatt_service.dart';
+import 'src/models/ble_scan_result.dart';
+import 'src/models/connect_config.dart';
+import 'src/models/scan_config.dart';
 
-
+export 'src/fbb_exception.dart';
+export 'src/fbb_log_level.dart';
+export 'src/models/ble_characteristic_id.dart';
+export 'src/models/ble_characteristic_value_event.dart';
+export 'src/models/ble_gatt_descriptor.dart';
+export 'src/models/ble_adapter_state.dart';
+export 'src/models/ble_connection_state.dart';
+export 'src/models/ble_gatt_service.dart';
+export 'src/models/ble_scan_result.dart';
+export 'src/models/connect_config.dart';
+export 'src/models/scan_config.dart';
 
 class FlutterBlueBackground {
+  /// Current log verbosity for the Dart layer.
+  static FbbLogLevel get logLevel => FbbLogger.level;
 
-  static const MethodChannel _channel =
-    MethodChannel('ios_back_plugin');
+  /// Plain-text log stream (ANSI stripped). Useful for in-app debug consoles.
+  static Stream<String> get logs => FbbLogger.logs;
 
-
-  static Future<String?> getPlatformVersion() async {
-    final version = await _channel.invokeMethod<String>('getBatteryLevel');
-    return version;
+  /// Sets plugin log verbosity on Dart and native.
+  ///
+  /// At [FbbLogLevel.verbose], method-channel calls and results are logged with
+  /// colored output in the Dart console (flutter_blue_plus style).
+  static Future<void> setLogLevel(FbbLogLevel level,
+      {bool color = true}) async {
+    FbbLogger.configure(level, color: color);
+    await FlutterBlueBackgroundPlatform.instance.setLogLevel(level);
   }
 
-
-  static Future<void> setLog() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    await preferences.reload();
-    final log = preferences.getStringList('log') ?? <String>[];
-    log.add("Ghous Muhammad");
-    await preferences.setStringList('log', log);
+  Future<String?> getPlatformVersion() {
+    return FlutterBlueBackgroundPlatform.instance.getPlatformVersion();
   }
 
-
-  static Future<void> stopFlutterBackgroundService() async {
-    final service = FlutterBackgroundService();
-    var isRunning = await service.isRunning();
-    if (isRunning) {
-      service.invoke("stopService");
-    } else {
-    }
+  /// Starts the native background (foreground) service so the app keeps
+  /// running in the background. On Android this shows a persistent
+  /// notification.
+  ///
+  /// Optionally customize the notification [notificationTitle] and
+  /// [notificationContent].
+  Future<bool> startService({
+    String? notificationTitle,
+    String? notificationContent,
+  }) {
+    return FlutterBlueBackgroundPlatform.instance.startService(
+      notificationTitle: notificationTitle,
+      notificationContent: notificationContent,
+    );
   }
 
-
-  // This Function will start or initialize background service in ios and android
-  static Future<void> startFlutterBackgroundService(Function()? backgroundFunction) async {
-    if(Platform.isAndroid){
-      try {
-        // await initializeService();
-        backgroundFunction!();
-      } catch (e) {
-        // print("Error executing in the background: $e");
-      }
-    }else{
-      try {
-        await _channel.invokeMethod('executeInBackground');
-        backgroundFunction!();
-      } catch (e) {
-        // print("Error executing in the background: $e");
-      }
-    }
-
-    }
-
-  static Future<void> initialize() async {
-    if(Platform.isAndroid){
-      await initializeService();
-    }else{
-      await _channel.invokeMethod('executeInBackground');
-    }
+  /// Stops the native background service.
+  Future<bool> stopService() {
+    return FlutterBlueBackgroundPlatform.instance.stopService();
   }
 
+  /// Returns whether the native background service is currently running.
+  Future<bool> isServiceRunning() {
+    return FlutterBlueBackgroundPlatform.instance.isServiceRunning();
+  }
 
-  // This method will write data on specific characteristic
-  static Future<void> connectToDevice({
-    required String deviceName,
-    required String serviceUuid,
-    required String characteristicUuid
+  /// Returns the current Bluetooth adapter (radio) state.
+  Future<BleAdapterState> getAdapterState() {
+    return FlutterBlueBackgroundPlatform.instance.getAdapterState();
+  }
+
+  /// A stream of Bluetooth adapter state changes.
+  Stream<BleAdapterState> get adapterState =>
+      FlutterBlueBackgroundPlatform.instance.adapterState;
+
+  /// Starts a BLE scan using [config].
+  ///
+  /// Discovered devices are delivered on [scanResults]. Calling this while a
+  /// scan is already running restarts the scan with the new [config].
+  Future<bool> startScan([ScanConfig config = const ScanConfig()]) {
+    return FlutterBlueBackgroundPlatform.instance.startScan(config);
+  }
+
+  /// Stops an in-progress BLE scan.
+  Future<bool> stopScan() {
+    return FlutterBlueBackgroundPlatform.instance.stopScan();
+  }
+
+  /// Whether a BLE scan is currently running.
+  Future<bool> isScanning() {
+    return FlutterBlueBackgroundPlatform.instance.isScanning();
+  }
+
+  /// A broadcast stream of BLE devices discovered during a scan.
+  Stream<BleScanResult> get scanResults =>
+      FlutterBlueBackgroundPlatform.instance.scanResults;
+
+  /// Returns the cached snapshot of devices discovered during the current or
+  /// most recent scan. On Android this includes devices found while the app UI
+  /// was gone but the foreground service kept scanning.
+  Future<List<BleScanResult>> getScanResults() {
+    return FlutterBlueBackgroundPlatform.instance.getScanResults();
+  }
+
+  /// Clears the cached scan results.
+  Future<bool> clearScanResults() {
+    return FlutterBlueBackgroundPlatform.instance.clearScanResults();
+  }
+
+  /// Connects to [deviceId] (from [BleScanResult.deviceId]) using [config].
+  ///
+  /// Requires [startService] to be running first. When [ConnectConfig.autoConnect]
+  /// is true, this returns once the native connect is initiated; listen to
+  /// [connectionState] for the connected event.
+  Future<bool> connect(
+    String deviceId, [
+    ConnectConfig config = const ConnectConfig(),
+  ]) {
+    return FlutterBlueBackgroundPlatform.instance.connect(deviceId, config);
+  }
+
+  /// Disconnects from [deviceId].
+  Future<bool> disconnect(
+    String deviceId, [
+    DisconnectConfig config = const DisconnectConfig(),
+  ]) {
+    return FlutterBlueBackgroundPlatform.instance.disconnect(deviceId, config);
+  }
+
+  /// Cached connection state for [deviceId].
+  Future<BleConnectionState> getConnectionState(String deviceId) {
+    return FlutterBlueBackgroundPlatform.instance.getConnectionState(deviceId);
+  }
+
+  /// Device ids currently connected.
+  Future<List<String>> getConnectedDevices() {
+    return FlutterBlueBackgroundPlatform.instance.getConnectedDevices();
+  }
+
+  /// Broadcast stream of GATT connection state changes.
+  Stream<BleConnectionEvent> get connectionState =>
+      FlutterBlueBackgroundPlatform.instance.connectionState;
+
+  /// Requests a larger ATT MTU on Android.
+  ///
+  /// On iOS the stack negotiates MTU automatically; this reads the current
+  /// negotiated value via `maximumWriteValueLength` and emits it on
+  /// [connectionState].
+  Future<int> requestMtu(String deviceId, int mtu) {
+    return FlutterBlueBackgroundPlatform.instance.requestMtu(deviceId, mtu);
+  }
+
+  /// Requests a connection priority update (Android only).
+  Future<void> requestConnectionPriority(
+    String deviceId,
+    ConnectionPriority priority,
+  ) {
+    return FlutterBlueBackgroundPlatform.instance.requestConnectionPriority(
+      deviceId,
+      priority,
+    );
+  }
+
+  /// Discovers GATT services on a connected device.
+  Future<List<BleGattService>> discoverServices(
+    String deviceId, {
+    Duration timeout = const Duration(seconds: 15),
+    bool subscribeToServicesChanged = true,
+  }) {
+    return FlutterBlueBackgroundPlatform.instance.discoverServices(
+      deviceId,
+      timeout: timeout,
+      subscribeToServicesChanged: subscribeToServicesChanged,
+    );
+  }
+
+  /// Reads a GATT characteristic value.
+  ///
+  /// Operations on the same [deviceId] are serialized (one at a time).
+  /// Throws [FbbException] on failure.
+  Future<Uint8List> readCharacteristic(
+    String deviceId,
+    BleCharacteristicId characteristic, {
+    Duration timeout = const Duration(seconds: 15),
   }) async {
-    if(Platform.isAndroid){
-      SharedPreferences preferences = await SharedPreferences.getInstance();
-      await preferences.reload();
-      final log = preferences.getStringList('connectToDevice') ?? <String>[];
-      log.clear();
-      log.add("connectToDevice");
-      log.add(deviceName);
-      log.add(serviceUuid);
-      log.add(characteristicUuid);
-      await preferences.setStringList('connectToDevice', log);
-      await initializeService();
-    }else{
-      await _channel.invokeMethod('connectToDevice', {
-        'deviceName': deviceName,
-        'serviceUuid': serviceUuid,
-        'characteristicUuid': characteristicUuid,
-      });
-    }
-
-  }
-  // static Future<void> connectToDevice() async {
-  //   await _channel.invokeMethod('connectToDevice');
-  // }
-
-  // static Future<void> writeData() async {
-  //   await _channel.invokeMethod('writeData');
-  // }
-
-  // static Future<void> readData() async {
-  //   await _channel.invokeMethod('readData');
-  // }
-
-
-  // This method will read data on specific characteristic
-  static Future<String?> readData({
-    String? serviceUuid,
-    required String characteristicUuid
-  }) async {
-    if(Platform.isAndroid){
-      SharedPreferences preferences = await SharedPreferences.getInstance();
-      await preferences.reload();
-      final log = preferences.getStringList('readData') ?? <String>[];
-      log.clear();
-      log.add("readData");
-      log.add(characteristicUuid);
-      await preferences.setStringList('readData', log);
-      return "";
-    }else{
-      final result = await _channel.invokeMethod('readData', {
-        'serviceUuid' : serviceUuid,
-        'characteristicUuid' : characteristicUuid
-      });
-
-      // Assuming that the result is a String, you can replace String with the actual type.
-      return result.toString();
-    }
-  }
-
-
-
-
-  // This method will write data on specific characteristic
-  static Future<void> writeData({
-    String? serviceUuid,
-    required String characteristicUuid,
-    required String data,
-  }) async {
-    if(Platform.isAndroid){
-      SharedPreferences preferences = await SharedPreferences.getInstance();
-      await preferences.reload();
-      final log = preferences.getStringList('writeData') ?? <String>[];
-      log.clear();
-      log.add("writeData");
-      log.add(characteristicUuid);
-      log.add(data);
-      await preferences.setStringList('writeData', log);
-    }else{
-      try {
-        await _channel.invokeMethod('writeData', {
-          'serviceUuid' : serviceUuid,
-          'characteristicUuid' : characteristicUuid,
-          'data': data
-        });
-      } catch (e) {
-        // print("Error executing in the writing value: $e");
-      }
-    }
-  }
-
-
-
-  // This method will delete all the data which is stored on the result of read characteristic
-  static Future<void> clearReadStorage() async {
+    await BleOperationMutex.take(deviceId);
     try {
-      SharedPreferences preferences = await SharedPreferences.getInstance();
-      await preferences.reload();
-      final log = preferences.getStringList('getReadData') ?? <String>[];
-      log.clear();
-      // print("clear read storage");
-    } catch (e) {
-      // print("Error to clear the read storage: $e");
+      return await FlutterBlueBackgroundPlatform.instance.readCharacteristic(
+        deviceId,
+        characteristic,
+        timeout: timeout,
+      );
+    } finally {
+      BleOperationMutex.give(deviceId);
     }
   }
 
-  static Future<List<String>?> getReadDataAndroid() async {
+  /// Writes [value] to a GATT characteristic.
+  ///
+  /// Operations on the same [deviceId] are serialized (one at a time).
+  /// Throws [FbbException] on failure.
+  Future<void> writeCharacteristic(
+    String deviceId,
+    BleCharacteristicId characteristic,
+    List<int> value, {
+    bool withoutResponse = false,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    await BleOperationMutex.take(deviceId);
     try {
-      SharedPreferences preferences = await SharedPreferences.getInstance();
-      await preferences.reload();
-      final log = preferences.getStringList('getReadData') ?? <String>[];
-      return log;
-      // print("clear read storage");
-    } catch (e) {
-      // print("Error to clear the read storage: $e");
-      return null;
+      await FlutterBlueBackgroundPlatform.instance.writeCharacteristic(
+        deviceId,
+        characteristic,
+        value,
+        withoutResponse: withoutResponse,
+        timeout: timeout,
+      );
+    } finally {
+      BleOperationMutex.give(deviceId);
     }
   }
 
+  /// Enables or disables notifications/indications.
+  ///
+  /// Operations on the same [deviceId] are serialized (one at a time).
+  /// Incoming values are delivered on [characteristicValues].
+  /// Throws [FbbException] on failure.
+  Future<void> setNotifyValue(
+    String deviceId,
+    BleCharacteristicId characteristic,
+    bool enable, {
+    bool forceIndications = false,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    await BleOperationMutex.take(deviceId);
+    try {
+      await FlutterBlueBackgroundPlatform.instance.setNotifyValue(
+        deviceId,
+        characteristic,
+        enable,
+        forceIndications: forceIndications,
+        timeout: timeout,
+      );
+    } finally {
+      BleOperationMutex.give(deviceId);
+    }
+  }
 
+  /// Stream of characteristic values from reads, write confirmations, and
+  /// notifications for all connected devices.
+  Stream<BleCharacteristicValueEvent> get characteristicValues =>
+      FlutterBlueBackgroundPlatform.instance.characteristicValues;
 
+  /// FBP-style filtered stream for a single characteristic.
+  ///
+  /// [sources] defaults to read, write, and notification events.
+  Stream<BleCharacteristicValueEvent> characteristicValuesFor(
+    String deviceId,
+    BleCharacteristicId characteristic, {
+    Set<BleCharacteristicValueSource> sources = const {
+      BleCharacteristicValueSource.read,
+      BleCharacteristicValueSource.write,
+      BleCharacteristicValueSource.notification,
+    },
+  }) {
+    return characteristicValues.where((event) {
+      if (event.deviceId != deviceId) return false;
+      if (event.serviceUuid != characteristic.serviceUuid) return false;
+      if (event.characteristicUuid != characteristic.characteristicUuid) {
+        return false;
+      }
+      if (event.instanceId != characteristic.instanceId) return false;
+      return sources.contains(event.source);
+    });
+  }
 
+  /// Notifications/indications only (matches FBP `onValueReceived`).
+  Stream<BleCharacteristicValueEvent> onCharacteristicReceived(
+    String deviceId,
+    BleCharacteristicId characteristic,
+  ) =>
+      characteristicValuesFor(
+        deviceId,
+        characteristic,
+        sources: const {BleCharacteristicValueSource.notification},
+      );
 }
-
-
-

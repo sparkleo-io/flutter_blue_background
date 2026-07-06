@@ -5,23 +5,40 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_blue_background_example/app/ble_example_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_blue_background_example/main.dart';
-
 void main() {
-  testWidgets('Verify Platform version', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that platform version is retrieved.
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) => widget is Text &&
-                           widget.data!.startsWith('Running on:'),
-      ),
-      findsOneWidget,
-    );
+  const channel = MethodChannel('flutter_blue_background');
+
+  setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      switch (methodCall.method) {
+        case 'isServiceRunning':
+          return false;
+        case 'startService':
+        case 'stopService':
+          return true;
+      }
+      return null;
+    });
+  });
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
+  });
+
+  testWidgets('Renders start/stop controls', (WidgetTester tester) async {
+    await tester.pumpWidget(const BleExampleApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Start service'), findsOneWidget);
+    expect(find.text('Stop service'), findsOneWidget);
+    expect(find.text('Service: STOPPED'), findsOneWidget);
   });
 }
